@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct ContentView: View {
     @State private var inputJSON: String = ""
     @State private var formattedJSON: String = ""
@@ -52,7 +50,7 @@ struct ContentView: View {
                 }
                 .padding()
 
-                Button("Copy Result") {
+                Button("Copy") {
                     copyResult()
                 }
                 .padding()
@@ -67,6 +65,7 @@ struct ContentView: View {
         }
         .padding()
         .frame(width: 600, height: 400)
+        .background(Color.primaryBackground)
     }
 
     private func formatJSON() {

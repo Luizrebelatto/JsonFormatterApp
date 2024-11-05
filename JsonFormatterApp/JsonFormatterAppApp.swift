@@ -8,10 +8,42 @@
 import SwiftUI
 
 @main
-struct JsonFormatterAppApp: App {
+struct JSONFormatterApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Settings {}
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    var statusItem: NSStatusItem!
+    var popover: NSPopover!
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Configuração do status item (ícone da barra de menu)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+
+        if let statusButton = statusItem.button {
+            statusButton.image = NSImage(named: "pcMac")  // Ícone do sistema temporário
+            statusButton.action = #selector(togglePopover(_:))
+        }
+
+        // Configuração do popover
+        popover = NSPopover()
+        popover.contentSize = NSSize(width: 300, height: 400)
+        popover.behavior = .transient
+        popover.contentViewController = NSHostingController(rootView: ContentView())
+    }
+
+    @objc func togglePopover(_ sender: AnyObject?) {
+        if let button = statusItem.button {
+            if popover.isShown {
+                popover.performClose(sender)
+            } else {
+                popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+                NSApp.activate(ignoringOtherApps: true)  // Foca no popover
+            }
         }
     }
 }
