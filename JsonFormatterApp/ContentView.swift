@@ -76,9 +76,9 @@ struct JSONNodeView: View {
     
     private var childNodes: [JSONNode] {
         if let dict = node.value as? [String: Any] {
-            return dict.map { JSONNode(key: $0.key, value: $0.value, isExpanded: true) } // Mudado para true
+            return dict.map { JSONNode(key: $0.key, value: $0.value, isExpanded: true) }
         } else if let array = node.value as? [Any] {
-            return array.enumerated().map { JSONNode(key: "[\($0.offset)]", value: $0.element, isExpanded: true) } // Mudado para true
+            return array.enumerated().map { JSONNode(key: "[\($0.offset)]", value: $0.element, isExpanded: true) }
         }
         return []
     }
@@ -89,18 +89,47 @@ struct ContentView: View {
     @State private var parsedJSON: Any?
     @State private var errorMessage: String?
     @State private var isCopied: Bool = false
-    
+    @State private var selectedFileType: FileType = .json
+
     let fixedWidth: CGFloat = 250
+    
+    enum FileType: String, CaseIterable, Identifiable {
+        case json = "JSON"
+        case xml = "XML"
+        case yaml = "YAML"
+        case sql = "SQL"
+        case html = "HTML"
+        
+        var id: String { self.rawValue }
+    }
 
     var body: some View {
         VStack {
-            Text("JSON Formatter")
+            Text("\(selectedFileType.rawValue) Formatter")
                 .font(.largeTitle)
                 .padding()
 
+            Menu {
+                ForEach(FileType.allCases) { type in
+                    Button(action: {
+                        selectedFileType = type
+                    }) {
+                        Text(type.rawValue)
+                    }
+                }
+            } label: {
+                HStack {
+                    Text("Select File Type: \(selectedFileType.rawValue)")
+                }
+                .padding()
+                .background(Color.gray.opacity(0.2))
+                .cornerRadius(8)
+            }
+            .padding()
+
             HStack {
                 VStack {
-                    Text("Input JSON")
+                    Text("Input \(selectedFileType.rawValue)")
                         .font(.headline)
                     TextEditor(text: $inputJSON)
                         .border(Color.gray)
@@ -108,7 +137,7 @@ struct ContentView: View {
                 }
 
                 VStack {
-                    Text("Formatted JSON")
+                    Text("Formatted \(selectedFileType.rawValue)")
                         .font(.headline)
                     if let json = parsedJSON {
                         ScrollView {
@@ -130,7 +159,7 @@ struct ContentView: View {
             .padding()
 
             HStack {
-                Button("Format JSON") {
+                Button("Format \(selectedFileType.rawValue)") {
                     formatJSON()
                 }
                 .padding()
@@ -166,7 +195,7 @@ struct ContentView: View {
             errorMessage = nil
         } catch {
             parsedJSON = nil
-            errorMessage = "Invalid JSON."
+            errorMessage = "Invalid \(selectedFileType.rawValue)."
         }
     }
 
@@ -189,7 +218,7 @@ struct ContentView: View {
                     }
                 }
             } catch {
-                errorMessage = "Erro ao copiar JSON"
+                errorMessage = "Error copying \(selectedFileType.rawValue)"
             }
         }
     }
