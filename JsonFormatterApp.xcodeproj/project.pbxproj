@@ -11,6 +11,8 @@
 		29178A2A2CD5B66D002FD91D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 29178A292CD5B66D002FD91D /* ContentView.swift */; };
 		29178A2C2CD5B66E002FD91D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 29178A2B2CD5B66E002FD91D /* Assets.xcassets */; };
 		29178A2F2CD5B66E002FD91D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 29178A2E2CD5B66E002FD91D /* Preview Assets.xcassets */; };
+		29FEF1682CE167C50095A08D /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 29FEF1672CE167C50095A08D /* SwiftSoup */; };
+		29FEF16B2CE1685A0095A08D /* Yams in Frameworks */ = {isa = PBXBuildFile; productRef = 29FEF16A2CE1685A0095A08D /* Yams */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				29FEF16B2CE1685A0095A08D /* Yams in Frameworks */,
+				29FEF1682CE167C50095A08D /* SwiftSoup in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +89,10 @@
 			dependencies = (
 			);
 			name = JsonFormatterApp;
+			packageProductDependencies = (
+				29FEF1672CE167C50095A08D /* SwiftSoup */,
+				29FEF16A2CE1685A0095A08D /* Yams */,
+			);
 			productName = JsonFormatterApp;
 			productReference = 29178A242CD5B66D002FD91D /* JsonFormatterApp.app */;
 			productType = "com.apple.product-type.application";
@@ -113,6 +121,10 @@
 				Base,
 			);
 			mainGroup = 29178A1B2CD5B66D002FD91D;
+			packageReferences = (
+				29FEF1662CE167C50095A08D /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				29FEF1692CE1685A0095A08D /* XCRemoteSwiftPackageReference "Yams" */,
+			);
 			productRefGroup = 29178A252CD5B66D002FD91D /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -341,6 +353,38 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		29FEF1662CE167C50095A08D /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.6;
+			};
+		};
+		29FEF1692CE1685A0095A08D /* XCRemoteSwiftPackageReference "Yams" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/jpsim/Yams.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		29FEF1672CE167C50095A08D /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 29FEF1662CE167C50095A08D /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		29FEF16A2CE1685A0095A08D /* Yams */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 29FEF1692CE1685A0095A08D /* XCRemoteSwiftPackageReference "Yams" */;
+			productName = Yams;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 29178A1C2CD5B66D002FD91D /* Project object */;
 }

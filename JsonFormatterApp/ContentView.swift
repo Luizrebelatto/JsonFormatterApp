@@ -5,93 +5,61 @@
 //  Created by Luiz Gabriel Rebelatto Bianchi on 01/11/24.
 
 import SwiftUI
+import UniformTypeIdentifiers
+import SwiftSoup
+import Yams
+import AppKit
 
-struct JSONNode: Identifiable {
-    let id = UUID()
-    let key: String?
-    let value: Any
-    var isExpanded: Bool
-    
-    var isCollection: Bool {
-        value is [String: Any] || value is [Any]
-    }
-}
+import Cocoa
 
-struct JSONNodeView: View {
-    let node: JSONNode
-    let level: Int
-    @State private var isExpanded: Bool
-    
-    init(node: JSONNode, level: Int) {
-        self.node = node
-        self.level = level
-        _isExpanded = State(initialValue: node.isExpanded)
-    }
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack {
-                if node.isCollection {
-                    Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
-                        .frame(width: 10)
-                }
-                
-                Text(formattedKey)
-                    .fontWeight(node.key != nil ? .bold : .regular)
-                
-                if !node.isCollection {
-                    Text(formattedValue)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding(.leading, CGFloat(level * 20))
-            .contentShape(Rectangle())
-            .onTapGesture {
-                if node.isCollection {
-                    isExpanded.toggle()
-                }
+struct YAMLFormatter {
+    // Função principal para formatar YAML
+    static func format(yaml: String) -> String {
+        var formattedLines: [String] = []
+        var indentLevel = 0
+        
+        // Divide o texto em linhas
+        let lines = yaml.components(separatedBy: .newlines)
+        
+        for line in lines {
+            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
+            
+            // Pula linhas vazias
+            guard !trimmedLine.isEmpty else {
+                formattedLines.append("")
+                continue
             }
             
-            if isExpanded && node.isCollection {
-                ForEach(childNodes) { childNode in
-                    JSONNodeView(node: childNode, level: level + 1)
-                }
+            // Reduz a indentação se a linha termina com ':'
+            if trimmedLine.hasSuffix(":") {
+                let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
+                formattedLines.append(indentedLine)
+                indentLevel += 1
+                continue
             }
-        }.frame(maxWidth: .infinity, alignment: .leading)
-    }
-    
-    private var formattedKey: String {
-        if let key = node.key {
-            return "\"\(key)\": "
+            
+            // Reduz a indentação se a linha começa com '-'
+            if trimmedLine.hasPrefix("-") {
+                let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
+                formattedLines.append(indentedLine)
+                continue
+            }
+            
+            // Caso padrão: mantém o nível de indentação atual
+            let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
+            formattedLines.append(indentedLine)
         }
-        return ""
-    }
-    
-    private var formattedValue: String {
-        if let stringValue = node.value as? String {
-            return "\"\(stringValue)\""
-        }
-        return "\(node.value)"
-    }
-    
-    private var childNodes: [JSONNode] {
-        if let dict = node.value as? [String: Any] {
-            return dict.map { JSONNode(key: $0.key, value: $0.value, isExpanded: true) }
-        } else if let array = node.value as? [Any] {
-            return array.enumerated().map { JSONNode(key: "[\($0.offset)]", value: $0.element, isExpanded: true) }
-        }
-        return []
+        
+        return formattedLines.joined(separator: "\n")
     }
 }
 
 struct ContentView: View {
     @State private var inputJSON: String = ""
-    @State private var parsedJSON: Any?
+    @State private var formattedJSON: String = ""
     @State private var errorMessage: String?
     @State private var isCopied: Bool = false
     @State private var selectedFileType: FileType = .json
-
-    let fixedWidth: CGFloat = 250
     
     enum FileType: String, CaseIterable, Identifiable {
         case json = "JSON"
@@ -101,14 +69,34 @@ struct ContentView: View {
         case html = "HTML"
         
         var id: String { self.rawValue }
+        
+        var fileExtension: String {
+            switch self {
+            case .json: return "json"
+            case .xml: return "xml"
+            case .yaml: return "yaml"
+            case .sql: return "sql"
+            case .html: return "html"
+            }
+        }
+        
+        var utType: UTType {
+            switch self {
+            case .json: return .json
+            case .xml: return .xml
+            case .yaml: return UTType("public.yaml") ?? .plainText
+            case .sql: return UTType("public.sql") ?? .plainText
+            case .html: return .html
+            }
+        }
     }
-
+    
     var body: some View {
         VStack {
             Text("\(selectedFileType.rawValue) Formatter")
                 .font(.largeTitle)
                 .padding()
-
+            
             Menu {
                 ForEach(FileType.allCases) { type in
                     Button(action: {
@@ -126,57 +114,51 @@ struct ContentView: View {
                 .cornerRadius(8)
             }
             .padding()
-
+            
             HStack {
                 VStack {
                     Text("Input \(selectedFileType.rawValue)")
                         .font(.headline)
                     TextEditor(text: $inputJSON)
                         .border(Color.gray)
-                        .frame(width: fixedWidth, height: 200)
+                        .frame(height: 200)
                 }
-
+                
                 VStack {
                     Text("Formatted \(selectedFileType.rawValue)")
                         .font(.headline)
-                    if let json = parsedJSON {
-                        ScrollView {
-                            if let dict = json as? [String: Any] {
-                                JSONNodeView(node: JSONNode(key: nil, value: dict, isExpanded: true), level: 0)
-                            } else if let array = json as? [Any] {
-                                JSONNodeView(node: JSONNode(key: nil, value: array, isExpanded: true), level: 0)
-                            }
-                        }
+                    TextEditor(text: .constant(formattedJSON))
                         .border(Color.gray)
-                        .frame(width: fixedWidth, height: 200)
-                    } else {
-                        TextEditor(text: .constant(""))
-                            .border(Color.gray)
-                            .frame(width: fixedWidth, height: 200)
-                    }
+                        .frame(height: 200)
+                        .disabled(true)
                 }
             }
             .padding()
-
+            
             HStack {
                 Button("Format \(selectedFileType.rawValue)") {
                     formatJSON()
                 }
                 .padding()
                 .disabled(inputJSON.isEmpty)
-
-                Button("Clear Fields") {
+                
+                Button("Clear") {
                     clearFields()
                 }
                 .padding()
-
+                
                 Button("Copy") {
                     copyResult()
                 }
                 .padding()
-                .disabled(parsedJSON == nil)
+                
+                Button("Download") {
+                    exportFile()
+                }
+                .padding()
+                .disabled(formattedJSON.isEmpty)
             }
-
+            
             if let error = errorMessage {
                 Text(error)
                     .foregroundColor(.red)
@@ -184,43 +166,80 @@ struct ContentView: View {
             }
         }
         .padding()
-        .frame(width: 600, height: 400)
-        .background(Color.white)
+        .frame(width: 600, height: 500)
+        .background(Color.primaryBackground)
+        .contentMargins(40)
     }
-
-    private func formatJSON() {
+        
+    func formatXML(_ xmlString: String) -> String {
         do {
-            let data = Data(inputJSON.utf8)
-            parsedJSON = try JSONSerialization.jsonObject(with: data, options: [])
-            errorMessage = nil
+            let xmlData = Data(xmlString.utf8)
+            let xmlDocument = try XMLDocument(data: xmlData, options: .nodePrettyPrint)
+            
+            xmlDocument.characterEncoding = "UTF-8"
+            
+            return xmlDocument.xmlString(options: .nodePrettyPrint)
         } catch {
-            parsedJSON = nil
-            errorMessage = "Invalid \(selectedFileType.rawValue)."
+            return "Invalid XML format."
         }
     }
-
+    
+    func formatHTML(_ htmlString: String) -> String {
+        do {
+            // Parseia o HTML de entrada
+            let document = try SwiftSoup.parse(htmlString)
+            
+            // Converte o documento de volta para uma string HTML formatada
+            let formattedHTML = try document.outerHtml()
+            
+            return formattedHTML
+        } catch {
+            // Retorna uma mensagem de erro se o HTML for inválido
+            return "Invalid HTML format."
+        }
+    }
+    
+    private func formatJSON() {
+        switch selectedFileType {
+        case .json:
+            do {
+                let data = Data(inputJSON.utf8)
+                let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+                let prettyData = try JSONSerialization.data(withJSONObject: jsonObject, options: [.prettyPrinted])
+                formattedJSON = String(data: prettyData, encoding: .utf8) ?? ""
+                errorMessage = nil
+            } catch {
+                formattedJSON = ""
+                errorMessage = "Invalid JSON."
+            }
+        case .xml:
+            formattedJSON = formatXML(inputJSON)
+        case .yaml:
+            formattedJSON = YAMLFormatter.format(yaml: inputJSON)
+        case .html:
+            formattedJSON = formatHTML(inputJSON)
+        default:
+            errorMessage = "Formatting not supported for this type."
+        }
+    }
+        
     private func clearFields() {
         inputJSON = ""
-        parsedJSON = nil
+        formattedJSON = ""
         errorMessage = nil
     }
-
+    
     private func copyResult() {
-        if let json = parsedJSON {
-            do {
-                let data = try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted])
-                if let formattedString = String(data: data, encoding: .utf8) {
-                    NSPasteboard.general.clearContents()
-                    NSPasteboard.general.setString(formattedString, forType: .string)
-                    isCopied = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        isCopied = false
-                    }
-                }
-            } catch {
-                errorMessage = "Error copying \(selectedFileType.rawValue)"
-            }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(formattedJSON, forType: .string)
+        isCopied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            isCopied = false
         }
+    }
+    
+    private func exportFile(){
+        print("ss")
     }
 }
 
