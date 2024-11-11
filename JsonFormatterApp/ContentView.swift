@@ -13,24 +13,20 @@ import AppKit
 import Cocoa
 
 struct YAMLFormatter {
-    // Função principal para formatar YAML
     static func format(yaml: String) -> String {
         var formattedLines: [String] = []
         var indentLevel = 0
         
-        // Divide o texto em linhas
         let lines = yaml.components(separatedBy: .newlines)
         
         for line in lines {
             let trimmedLine = line.trimmingCharacters(in: .whitespaces)
             
-            // Pula linhas vazias
             guard !trimmedLine.isEmpty else {
                 formattedLines.append("")
                 continue
             }
             
-            // Reduz a indentação se a linha termina com ':'
             if trimmedLine.hasSuffix(":") {
                 let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
                 formattedLines.append(indentedLine)
@@ -38,14 +34,12 @@ struct YAMLFormatter {
                 continue
             }
             
-            // Reduz a indentação se a linha começa com '-'
             if trimmedLine.hasPrefix("-") {
                 let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
                 formattedLines.append(indentedLine)
                 continue
             }
             
-            // Caso padrão: mantém o nível de indentação atual
             let indentedLine = String(repeating: "  ", count: indentLevel) + trimmedLine
             formattedLines.append(indentedLine)
         }
@@ -115,13 +109,14 @@ struct ContentView: View {
             }
             .padding()
             
-            HStack {
+            VStack {
                 VStack {
                     Text("Input \(selectedFileType.rawValue)")
                         .font(.headline)
                     TextEditor(text: $inputJSON)
                         .border(Color.gray)
                         .frame(height: 200)
+                        
                 }
                 
                 VStack {
@@ -133,7 +128,6 @@ struct ContentView: View {
                         .disabled(true)
                 }
             }
-            .padding()
             
             HStack {
                 Button("Format \(selectedFileType.rawValue)") {
@@ -166,7 +160,7 @@ struct ContentView: View {
             }
         }
         .padding()
-        .frame(width: 600, height: 500)
+        .frame(width: 500, height: 700)
         .background(Color.primaryBackground)
         .contentMargins(40)
     }
