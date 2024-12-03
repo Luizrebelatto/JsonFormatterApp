@@ -125,7 +125,7 @@ struct ContentView: View {
                     TextEditor(text: .constant(formattedJSON))
                         .border(Color.gray)
                         .frame(height: 200)
-                        .disabled(true)
+//                        .disabled(true)
                 }
             }
             
@@ -146,11 +146,11 @@ struct ContentView: View {
                 }
                 .padding()
                 
-                Button("Download") {
-                    exportFile()
-                }
-                .padding()
-                .disabled(formattedJSON.isEmpty)
+//                Button("Download") {
+//                    exportFile()
+//                }
+//                .padding()
+//                .disabled(formattedJSON.isEmpty)
             }
             
             if let error = errorMessage {
