@@ -21,15 +21,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var popover: NSPopover!
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Configuração do status item (ícone da barra de menu)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
         if let statusButton = statusItem.button {
-            statusButton.image = NSImage(named: "pcMac")  // Ícone do sistema temporário
+            statusButton.image = NSImage(named: "pcMac")
             statusButton.action = #selector(togglePopover(_:))
         }
 
-        // Configuração do popover
         popover = NSPopover()
         popover.contentSize = NSSize(width: 300, height: 400)
         popover.behavior = .transient

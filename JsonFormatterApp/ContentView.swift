@@ -125,7 +125,6 @@ struct ContentView: View {
                     TextEditor(text: .constant(formattedJSON))
                         .border(Color.gray)
                         .frame(height: 200)
-//                        .disabled(true)
                 }
             }
             
@@ -145,12 +144,6 @@ struct ContentView: View {
                     copyResult()
                 }
                 .padding()
-                
-//                Button("Download") {
-//                    exportFile()
-//                }
-//                .padding()
-//                .disabled(formattedJSON.isEmpty)
             }
             
             if let error = errorMessage {
@@ -180,15 +173,12 @@ struct ContentView: View {
     
     func formatHTML(_ htmlString: String) -> String {
         do {
-            // Parseia o HTML de entrada
             let document = try SwiftSoup.parse(htmlString)
-            
-            // Converte o documento de volta para uma string HTML formatada
+
             let formattedHTML = try document.outerHtml()
             
             return formattedHTML
         } catch {
-            // Retorna uma mensagem de erro se o HTML for inválido
             return "Invalid HTML format."
         }
     }
