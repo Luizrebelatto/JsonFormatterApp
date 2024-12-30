@@ -12,4 +12,4 @@ MacOS App to formatter code
 
 |                |              Light               |              Dark               |
 | :------------: | :----------------------------------------: | :---------------------------------------: |
-| Screen | ![](src/assets/lightMode-android.png) | ![](src/assets/darkMode-android.png) |
+| Screen | ![](https://github.com/user-attachments/assets/5fe589c8-9132-4d57-89f8-9489a697cfbe) | ![](https://github.com/user-attachments/assets/3e35dba7-3547-4912-8746-17e384c5b8e2) |
