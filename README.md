@@ -1,6 +1,6 @@
 # Formatter App
 
-MacOS App to formatter code
+MacOS App to formatter code(json, html, xml, sql, yaml)
 
 ### 🛠 Tech and Libraries
 
